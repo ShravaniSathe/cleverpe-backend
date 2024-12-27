@@ -1,0 +1,127 @@
+/* Ensure the full page takes the viewport height */
+.page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f5f5;
+    /* Light background */
+    margin: 0;
+    padding: 0;
+}
+
+/* Background Rectangle */
+.background-rectangle {
+    display: flex;
+    width: 70%;
+    /* 3/4 of the screen width */
+    height: 85%;
+    /* 3/4 of the screen height */
+    background-color: white;
+    border: 2px solid #ccc;
+    /* Gray boundary */
+    border-radius: 15px;
+    /* Rounded corners */
+    position: relative;
+    /* Enables positioning of child elements */
+    overflow: hidden;
+    /* Ensures content stays inside rounded edges */
+}
+
+/* Left Card Section */
+.left-card {
+    position: absolute;
+    left: 20px;
+    /* Push the card inside the background rectangle */
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #158380;
+    /* Greenish background */
+    color: white;
+    width: 35%;
+    /* Card width */
+    height: 90%;
+    /* Card height */
+    border-radius: 15px;
+    /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    /* Soft shadow */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.left-card h1 {
+    margin: 0;
+    font-size: 2em;
+}
+
+.left-card p {
+    margin: 10px 0 20px;
+    font-size: 1.2em;
+}
+
+.logo {
+    width: 100px;
+    /* Adjust size as needed */
+    height: auto;
+    margin: 0 auto;
+    display: block;
+    margin-bottom: 15px;
+}
+
+/* Right Content Section */
+.right-content {
+    margin-left: 40%;
+    /* Shift to the right of the left card */
+    width: 55%;
+    /* Remaining space for right content */
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.right-content h1 {
+    margin-bottom: 10px;
+    font-size: 2em;
+    text-align: center;
+}
+
+.right-content p {
+    margin-bottom: 20px;
+    font-size: 1em;
+    color: #555;
+    text-align: center;
+}
+
+.email-input {
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 1em;
+    width: 60%;
+    /* Smaller input width */
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    /* Rounded corners */
+}
+
+.send-otp-button {
+    padding: 10px;
+    font-size: 1em;
+    color: white;
+    background-color: #158380;
+    border: none;
+    border-radius: 10px;
+    /* Rounded corners */
+    cursor: pointer;
+    width: 30%;
+    /* Half the width of the input field */
+}
+
+.send-otp-button:hover {
+    background-color: #146a68;
+    /* Slightly darker on hover */
+}
