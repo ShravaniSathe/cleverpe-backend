@@ -13,9 +13,9 @@
 /* Background Rectangle */
 .background-rectangle {
     display: flex;
-    width: 70%;
+    width: 75%;
     /* 3/4 of the screen width */
-    height: 85%;
+    height: 75%;
     /* 3/4 of the screen height */
     background-color: white;
     border: 2px solid #ccc;
@@ -68,7 +68,6 @@
     height: auto;
     margin: 0 auto;
     display: block;
-    margin-bottom: 15px;
 }
 
 /* Right Content Section */
