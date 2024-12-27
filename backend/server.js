@@ -1,35 +1,41 @@
 const express = require("express");
 const mongoose = require("mongoose");
-require("dotenv").config(); // Load environment variables
+require("dotenv").config();
+const authRoutes = require("./routes/authRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+const { authenticate } = require("./middlewares/authMiddleware"); // Import the authenticate middleware
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000; // Use environment variable for the port
 
 // Middleware
 app.use(express.json()); // For parsing JSON requests
 
-// MongoDB Connection
+// MongoDB Connection Function
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGO_URI);
+
     console.log("Connected to MongoDB Atlas");
   } catch (err) {
     console.error("Error connecting to MongoDB:", err.message);
-    process.exit(1);
+    process.exit(1); // Exit process with failure
   }
 };
 
+// Connect to MongoDB
+connectDB();
 
+// Default Route
 app.get("/", (req, res) => {
-    res.send("Hello, CleverPe backend is working!");
-  });
+  res.send("Hello, CleverPe backend is working!");
+});
 
+// API Routes
+app.use("/api/auth", authRoutes); // Authentication routes
+app.use("/api/tasks", authenticate, taskRoutes); // Task routes with authentication middleware
 
+// Start the Server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
-connectDB();
