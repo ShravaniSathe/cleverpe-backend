@@ -1,24 +1,37 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
-import './LoginOtpPage.css'; // Import the updated CSS file
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./LoginOtpPage.css";
 
 function LoginOtpPage() {
-  const [email, setEmail] = useState(''); // State to hold the email value
-  const navigate = useNavigate(); // Use the useNavigate hook for navigation
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Handle the email input change
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
   };
 
-  // Handle the 'Get OTP' button click
-  const handleGetOtpClick = () => {
-    // You can add email validation here if needed
+  const handleGetOtpClick = async () => {
     if (email) {
-      // Navigate to the OTP verification page
-      navigate('/verify-otp');
+      setLoading(true);
+      try {
+        const response = await axios.post("http://localhost:5000/api/auth/send-otp", {
+          email,
+        });
+        if (response.data.success) {
+          alert("OTP sent to your email.");
+          navigate("/verify-otp", { state: { email } });
+        } else {
+          alert(response.data.message || "Failed to send OTP.");
+        }
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+        alert("Error sending OTP. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     } else {
-      // Handle case where email is not provided, if needed
       alert("Please enter a valid email address.");
     }
   };
@@ -26,14 +39,11 @@ function LoginOtpPage() {
   return (
     <div className="page-container">
       <div className="background-rectangle">
-        {/* Left Card Section */}
         <div className="left-card">
           <img src="/cleverpe_logo.jpg" alt="Logo" className="logo" />
           <h1>WELCOME</h1>
           <p>to the CleverPe Admin Dashboard !!</p>
         </div>
-
-        {/* Right Content Section */}
         <div className="right-content">
           <h1>Login</h1>
           <p>Enter your email address to get OTP</p>
@@ -42,10 +52,14 @@ function LoginOtpPage() {
             placeholder="Email Address"
             className="email-input"
             value={email}
-            onChange={handleEmailChange} // Update email state on change
+            onChange={handleEmailChange}
           />
-          <button className="send-otp-button" onClick={handleGetOtpClick}>
-            Get OTP
+          <button
+            className="send-otp-button"
+            onClick={handleGetOtpClick}
+            disabled={loading}
+          >
+            {loading ? "Sending..." : "Get OTP"}
           </button>
         </div>
       </div>
