@@ -13,7 +13,7 @@
 /* Background Rectangle */
 .background-rectangle {
     display: flex;
-    width: 75%;
+    width: 60%;
     /* 3/4 of the screen width */
     height: 75%;
     /* 3/4 of the screen height */
@@ -32,16 +32,16 @@
 .left-card {
     position: absolute;
     left: 20px;
-    /* Push the card inside the background rectangle */
-    top: 50%;
-    transform: translateY(-50%);
+    /* Equal spacing on the left */
+    top: 20px;
+    /* Equal spacing on the top */
+    bottom: 20px;
+    /* Equal spacing on the bottom */
     background-color: #158380;
     /* Greenish background */
     color: white;
-    width: 35%;
-    /* Card width */
-    height: 90%;
-    /* Card height */
+    width: calc(35% - 20px);
+    /* Adjusted width to fit within the rectangle */
     border-radius: 15px;
     /* Rounded corners */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -50,7 +50,14 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    z-index: 2;
+    /* Ensure visibility over the parent background */
+    overflow: hidden;
+    /* Prevent content from overflowing */
+    clip-path: inset(0 round 15px);
+    /* Ensures all corners are rounded */
 }
+
 
 .left-card h1 {
     margin: 0;

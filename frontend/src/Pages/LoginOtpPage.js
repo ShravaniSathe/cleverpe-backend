@@ -19,7 +19,7 @@ function LoginOtpPage() {
         const response = await axios.post("http://localhost:5000/api/auth/send-otp", {
           email,
         });
-        if (response.data.success) {
+        if (response.data.message === "OTP sent successfully") {
           alert("OTP sent to your email.");
           navigate("/verify-otp", { state: { email } });
         } else {
