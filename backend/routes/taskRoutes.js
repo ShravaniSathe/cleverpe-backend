@@ -91,10 +91,14 @@ router.get("/report/csv", async (req, res) => {
     }
 
     const tasks = await Task.find(filter).select("title status dueDate createdAt");
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.status === "Completed").length;
+    const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(2) : "0.00";
 
     const fields = ["title", "status", "dueDate", "createdAt"];
     const json2csvParser = new Parser({ fields });
-    const csv = json2csvParser.parse(tasks);
+    let csv = json2csvParser.parse(tasks);
+    csv += `\n\nCompletion Rate: ${completionRate}%`;
 
     res.header("Content-Type", "text/csv");
     res.attachment("tasks-report.csv");
@@ -114,6 +118,9 @@ router.get("/report/pdf", async (req, res) => {
     }
 
     const tasks = await Task.find(filter).select("title status dueDate createdAt");
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.status === "Completed").length;
+    const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(2) : "0.00";
 
     const doc = new PDFDocument();
     let buffers = [];
@@ -134,6 +141,8 @@ router.get("/report/pdf", async (req, res) => {
       );
     });
 
+    doc.moveDown();
+    doc.text(`Completion Rate: ${completionRate}%`, { align: "center" });
     doc.end();
   } catch (error) {
     res.status(500).json({ message: "Error generating PDF report", error: error.message });
