@@ -1,6 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./OtpVerificationPage.css";
 
 function OtpVerificationPage() {
@@ -10,6 +12,14 @@ function OtpVerificationPage() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const email = state?.email || "";
+  const successMessage = state?.successMessage || "";
+
+  // Display success message if passed from the previous page
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage, { autoClose: 3000 });
+    }
+  }, [successMessage]);
 
   const handleChange = (e, index) => {
     const { value } = e.target;
@@ -26,7 +36,7 @@ function OtpVerificationPage() {
   const handleVerifyClick = async () => {
     const enteredOtp = otp.join("");
     if (enteredOtp.length !== 6) {
-      alert("Please enter a valid 6-digit OTP.");
+      toast.error("Please enter a valid 6-digit OTP.");
       return;
     }
 
@@ -37,14 +47,16 @@ function OtpVerificationPage() {
         otp: enteredOtp,
       });
       if (response.data.success) {
-        alert("OTP verified successfully.");
-        navigate("/dashboard");
+        // Navigate to the Dashboard after OTP verification
+        navigate("/Dashboard", {
+          state: { successMessage: "OTP verified successfully! Welcome to Dashboard!" },
+        });
       } else {
-        alert(response.data.message || "Invalid OTP.");
+        toast.error(response.data.message || "Invalid OTP.");
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("Error verifying OTP. Please try again.");
+      toast.error("Error verifying OTP. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -52,6 +64,8 @@ function OtpVerificationPage() {
 
   return (
     <div className="page-container">
+      {/* ToastContainer with bottom-center position */}
+      <ToastContainer position="bottom-center" autoClose={3000} />
       <div className="background-rectangle">
         <div className="left-card">
           <img src="/cleverpe_logo.jpg" alt="Logo" className="logo" />
