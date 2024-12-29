@@ -1,6 +1,7 @@
 const express = require("express");
 const { sendOTP, verifyOTP, logout } = require("../controllers/authController");
 const { authenticate } = require("../middlewares/authMiddleware");
+const nodemailer = require('nodemailer');
 
 const router = express.Router();
 
