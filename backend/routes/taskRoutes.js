@@ -21,6 +21,92 @@ router.post("/", async (req, res) => {
   }
 });
 
+//weekly analysis from monday to friday of current week
+router.get("/weekly-analysis", async (req, res) => {
+  try {
+    // Get the current date
+    const today = new Date();
+
+    // Calculate the start of the week (Monday) in UTC
+    const startOfWeek = new Date(today);
+    const dayOfWeek = today.getUTCDay();
+    const diffToMonday = (dayOfWeek === 0 ? 6 : dayOfWeek - 1); // Adjust for Monday being day 1
+    startOfWeek.setUTCDate(today.getUTCDate() - diffToMonday); // Set to Monday
+    startOfWeek.setUTCHours(0, 0, 0, 0); // Midnight (UTC)
+    const startOfWeekUTC = new Date(startOfWeek.toISOString()); // Ensure UTC
+
+    // Calculate the end of the week (Friday) in UTC
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 4); // Friday
+    endOfWeek.setUTCHours(23, 59, 59, 999); // End of the day
+    const endOfWeekUTC = new Date(endOfWeek.toISOString()); // Ensure UTC
+
+    console.log("Start of Week (UTC):", startOfWeekUTC.toISOString());
+    console.log("End of Week (UTC):", endOfWeekUTC.toISOString());
+
+    // Fetch tasks within the date range (createdAt in UTC)
+    const tasks = await Task.find({
+      createdAt: {
+        $gte: startOfWeekUTC,
+        $lte: endOfWeekUTC,
+      },
+    });
+
+    console.log("Tasks found within the date range:", tasks);
+
+    if (tasks.length === 0) {
+      return res.status(200).json("No tasks found for the specified week.");
+    }
+
+    // Aggregating tasks by day of the week and status
+    const taskAggregation = await Task.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfWeekUTC,
+            $lte: endOfWeekUTC,
+          },
+        },
+      },
+      {
+        $project: {
+          createdAt: 1,
+          dayOfWeek: { $dayOfWeek: "$createdAt" }, // Adding dayOfWeek to output
+          status: 1,
+        },
+      },
+      {
+        $group: {
+          _id: {
+            day: "$dayOfWeek", // Group by dayOfWeek (1 = Sunday, 7 = Saturday)
+            status: "$status",
+          },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    console.log("Aggregated tasks:", taskAggregation);
+
+    // Mapping aggregated data to days of the week (Monday to Friday)
+    const result = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day, index) => {
+      const dayIndex = index + 2; // $dayOfWeek: Monday = 2, Friday = 6
+      const dayTasks = taskAggregation.filter((task) => task._id.day === dayIndex);
+
+      const completed = dayTasks.find((task) => task._id.status === "Completed")?.count || 0;
+      const inProgress = dayTasks.find((task) => task._id.status === "In Progress")?.count || 0;
+
+      return { day, completed, inProgress };
+    });
+
+    // Sending response
+    res.json(result);
+
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching weekly analysis", error: error.message });
+  }
+});
+
 // Get tasks created and completed over the last month (for line chart)
 router.get("/overview", async (req, res) => {
   try {
