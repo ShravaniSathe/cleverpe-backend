@@ -5,6 +5,8 @@ const Admin = require("../models/adminModel");
 const { generateToken } = require("../utils/jwt");
 const { generateOTP } = require("../utils/otpGenerator");
 
+const { addToBlacklist } = require("../utils/blacklist");
+
 // Set up nodemailer transporter with your email provider's settings using environment variables
 const transporter = nodemailer.createTransport({
   service: 'gmail', // or any other email service provider
@@ -108,6 +110,18 @@ exports.verifyOTP = async (req, res) => {
     console.error("Error verifying OTP:", error.message);
     res.status(500).json({ message: "Error verifying OTP", error: error.message });
   }
+};
+// Logout function
+exports.logout = async (req, res) => {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+
+  if (!token) {
+    return res.status(400).json({ message: "Token not provided" });
+  }
+
+  // Add the token to the blacklist
+  addToBlacklist(token);
+  return res.status(200).json({ message: "Logged out successfully" });
 };
 
 
