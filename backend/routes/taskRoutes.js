@@ -21,67 +21,46 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get all tasks (with optional pagination)
-router.get("/", async (req, res) => {
+// Get tasks created and completed over the last month (for line chart)
+router.get("/overview", async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
-    const tasks = await Task.find()
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
-    res.json(tasks);
+    const today = new Date();
+    const lastMonth = new Date();
+    lastMonth.setDate(today.getDate() - 30);
+
+    // Aggregate tasks created in the last 30 days
+    const createdTasks = await Task.aggregate([
+      { $match: { createdAt: { $gte: lastMonth, $lte: today } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Aggregate tasks completed in the last 30 days
+    const completedTasks = await Task.aggregate([
+      { $match: { status: "Completed", updatedAt: { $gte: lastMonth, $lte: today } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    res.json({
+      createdTasks,
+      completedTasks,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching tasks", error: error.message });
-  }
-});
-
-// Get task by ID
-router.get("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Find the task by ID
-    const task = await Task.findById(id);
-
-    // If the task is not found, return a 404
-    if (!task) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    // If found, return the task data
-    res.json(task);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching task by ID", error: error.message });
-  }
-});
-
-// Update a task
-router.put("/:id", async (req, res) => {
-  try {
-    const { title, description, status, dueDate } = req.body;
-    const task = await Task.findByIdAndUpdate(
-      req.params.id,
-      { title, description, status, dueDate },
-      { new: true }
-    );
-    if (!task) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-    res.json(task);
-  } catch (error) {
-    res.status(500).json({ message: "Error updating task", error: error.message });
-  }
-});
-
-// Delete a task
-router.delete("/:id", async (req, res) => {
-  try {
-    const task = await Task.findByIdAndDelete(req.params.id);
-    if (!task) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-    res.json({ message: "Task deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error deleting task", error: error.message });
+    res.status(500).json({
+      message: "Error fetching monthly overview",
+      error: error.message,
+    });
   }
 });
 
@@ -161,4 +140,67 @@ router.get("/report/pdf", async (req, res) => {
   }
 });
 
+// Get all tasks (with optional pagination)
+router.get("/", async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const tasks = await Task.find()
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching tasks", error: error.message });
+  }
+});
+
+// Get task by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the task by ID
+    const task = await Task.findById(id);
+
+    // If the task is not found, return a 404
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // If found, return the task data
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching task by ID", error: error.message });
+  }
+});
+
+// Update a task
+router.put("/:id", async (req, res) => {
+  try {
+    const { title, description, status, dueDate } = req.body;
+    const task = await Task.findByIdAndUpdate(
+      req.params.id,
+      { title, description, status, dueDate },
+      { new: true }
+    );
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.json(task);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating task", error: error.message });
+  }
+});
+
+// Delete a task
+router.delete("/:id", async (req, res) => {
+  try {
+    const task = await Task.findByIdAndDelete(req.params.id);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.json({ message: "Task deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting task", error: error.message });
+  }
+});
 module.exports = router;
