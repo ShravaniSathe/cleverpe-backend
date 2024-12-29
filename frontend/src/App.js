@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LoginOtpPage from "./Pages/LoginOtpPage";
 import OtpVerificationPage from "./Pages/OtpVerificationPage";
-import Dashboard from "./Pages/dashboard";
+import Dashboard from "./Pages/Dashboard";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginOtpPage />} />
         <Route path="/verify-otp" element={<OtpVerificationPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/Dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
