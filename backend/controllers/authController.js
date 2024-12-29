@@ -81,6 +81,9 @@ exports.verifyOTP = async (req, res) => {
 
     // Check if the OTP has expired
     if (now > otpExpiryTime) {
+      admin.otp = undefined; // Clear expired OTP
+      admin.otpExpiry = undefined; // Clear expired OTP expiry
+      await admin.save(); // Save changes
       return res.status(400).json({ message: "OTP has expired" });
     }
 
