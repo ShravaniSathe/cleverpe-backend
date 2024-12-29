@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const cors = require("cors"); // Import cors
+const cors = require("cors"); // Import the cors package
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const { authenticate } = require("./middlewares/authMiddleware"); // Import the authenticate middleware
@@ -10,15 +10,8 @@ const app = express();
 const PORT = process.env.PORT || 5000; // Use environment variable for the port
 
 // Middleware
+app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // For parsing JSON requests
-
-// Configure CORS
-const corsOptions = {
-  origin: ["http://localhost:3000"], // Allow requests from localhost:3000
-  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
-};
-app.use(cors(corsOptions)); // Enable CORS with options
 
 // MongoDB Connection Function
 const connectDB = async () => {
